@@ -36,6 +36,7 @@ if is_vision_available():
 if is_torch_available():
     _import_structure["modeling_layoutlmv2"] = [
         "LAYOUTLMV2_PRETRAINED_MODEL_ARCHIVE_LIST",
+        "LayoutLMv2ForRelationExtraction",
         "LayoutLMv2ForQuestionAnswering",
         "LayoutLMv2ForSequenceClassification",
         "LayoutLMv2ForTokenClassification",
@@ -58,6 +59,7 @@ if TYPE_CHECKING:
     if is_torch_available():
         from .modeling_layoutlmv2 import (
             LAYOUTLMV2_PRETRAINED_MODEL_ARCHIVE_LIST,
+            LayoutLMv2ForRelationExtraction,
             LayoutLMv2ForQuestionAnswering,
             LayoutLMv2ForSequenceClassification,
             LayoutLMv2ForTokenClassification,
