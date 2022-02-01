@@ -36,18 +36,18 @@ class RegionExtractionOutput(ModelOutput):
             }
         relations (list of dicts of shape `(batch_size,)` where each dict contains:
             {
-                'head': `torch.IntTensor` of shape `(num_entites)`,
+                'head': `torch.IntTensor` of shape `(up to num_entites^2)`,
                     Each value in the list represents the key of a different relation. A value can be used to map to
                     the entity list as it tells you what index to inspect in any of the lists inside the entities dict
                     (reps the id of the entity `(element of range(0, len(entities)`)
-                'tail': `torch.IntTensor` of shape `(num_entites)`,
+                'tail': `torch.IntTensor` of shape `(up to num_entites^2)`,
                     Each value in the list represents the value of a different relation. A value can be used to map to
                     the entity list as it tells you what index to inspect in any of the lists inside the entities dict
                     (reps the id of the entity `(element of range(0, len(entities)`)
-                'start_index': `torch.IntTensor` of shape `(num_entites)`,
+                'start_index': `torch.IntTensor` of shape `(up to num_entites^2)`,
                     Each value in this list represents the start index (element of range(0, len(tokens)) for the
                     combined head and tail entities e.g. `min(entities['start']['head'], entities['start']['tail'])`
-                'end_index': `torch.IntTensor` of shape `(num_entites)`,
+                'end_index': `torch.IntTensor` of shape `(up to num_entites^2)`,
                     Each value in this list represents the end index (element of range(0, len(tokens)) for the
                     combined head and tail entities e.g. `min(entities['end']['head'], entities['end']['tail'])`
             }
