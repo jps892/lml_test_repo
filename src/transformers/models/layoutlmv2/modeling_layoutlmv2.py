@@ -1510,7 +1510,7 @@ class RegionExtractionDecoder(nn.Module):
     LAYOUTLMV2_START_DOCSTRING,
 )
 class LayoutLMv2ForRelationExtraction(LayoutLMv2PreTrainedModel):
-    def __init__(self, config):
+    def __init__(self, config, _configuration_file=None):
         super().__init__(config)
         self.layoutlmv2 = LayoutLMv2Model(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
