@@ -1535,7 +1535,8 @@ class LayoutLMv2ForRelationExtraction(LayoutLMv2PreTrainedModel):
         relations=None,
     ):
         r"""
-        entities (list of dicts of shape `(batch_size,)` where each dict contains {
+        entities (list of dicts of shape `(batch_size,)` where each dict contains:
+            {
                 'start': `torch.IntTensor` of shape `(num_entites)`,
                     Each value in the list represents the id of the token (element of range(0, len(tokens)) where the
                     entity starts
@@ -1545,7 +1546,8 @@ class LayoutLMv2ForRelationExtraction(LayoutLMv2PreTrainedModel):
                 'label': `torch.IntTensor` of shape `(num_entites)`
                     Each value in the list represents the label (as an int) of the entity
             }
-        relations (list of dicts of shape `(batch_size,)` where each dict contains {
+        relations (list of dicts of shape `(batch_size,)` where each dict contains:
+            {
                 'head': `torch.IntTensor` of shape `(num_entites)`,
                     Each value in the list represents the key of a different relation. A value can be used to map to
                     the entity list as it tells you what index to inspect in any of the lists inside the entities dict
