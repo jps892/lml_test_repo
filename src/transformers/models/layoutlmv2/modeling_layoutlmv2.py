@@ -14,10 +14,9 @@
 # limitations under the License.
 """ PyTorch LayoutLMv2 model."""
 
-
 import math
 import copy
-
+import numpy as np
 import torch
 import torch.utils.checkpoint
 from torch import nn
@@ -42,7 +41,6 @@ from .outputs_layoutlmv2 import RegionExtractionOutput
 from ...modeling_utils import PreTrainedModel, apply_chunking_to_forward
 from ...utils import logging
 from .configuration_layoutlmv2 import LayoutLMv2Config
-
 
 # soft dependency
 if is_detectron2_available():
@@ -157,13 +155,13 @@ class LayoutLMv2SelfAttention(nn.Module):
         return q, k, v
 
     def forward(
-        self,
-        hidden_states,
-        attention_mask=None,
-        head_mask=None,
-        output_attentions=False,
-        rel_pos=None,
-        rel_2d_pos=None,
+            self,
+            hidden_states,
+            attention_mask=None,
+            head_mask=None,
+            output_attentions=False,
+            rel_pos=None,
+            rel_2d_pos=None,
     ):
         q, k, v = self.compute_qkv(hidden_states)
 
@@ -205,13 +203,13 @@ class LayoutLMv2Attention(nn.Module):
         self.output = LayoutLMv2SelfOutput(config)
 
     def forward(
-        self,
-        hidden_states,
-        attention_mask=None,
-        head_mask=None,
-        output_attentions=False,
-        rel_pos=None,
-        rel_2d_pos=None,
+            self,
+            hidden_states,
+            attention_mask=None,
+            head_mask=None,
+            output_attentions=False,
+            rel_pos=None,
+            rel_2d_pos=None,
     ):
         self_outputs = self.self(
             hidden_states,
@@ -281,13 +279,13 @@ class LayoutLMv2Layer(nn.Module):
         self.output = LayoutLMv2Output(config)
 
     def forward(
-        self,
-        hidden_states,
-        attention_mask=None,
-        head_mask=None,
-        output_attentions=False,
-        rel_pos=None,
-        rel_2d_pos=None,
+            self,
+            hidden_states,
+            attention_mask=None,
+            head_mask=None,
+            output_attentions=False,
+            rel_pos=None,
+            rel_2d_pos=None,
     ):
         self_attention_outputs = self.attention(
             hidden_states,
@@ -350,7 +348,7 @@ def relative_position_bucket(relative_position, bidirectional=True, num_buckets=
 
     # The other half of the buckets are for logarithmically bigger bins in positions up to max_distance
     val_if_large = max_exact + (
-        torch.log(n.float() / max_exact) / math.log(max_distance / max_exact) * (num_buckets - max_exact)
+            torch.log(n.float() / max_exact) / math.log(max_distance / max_exact) * (num_buckets - max_exact)
     ).to(torch.long)
     val_if_large = torch.min(val_if_large, torch.full_like(val_if_large, num_buckets - 1))
 
@@ -419,15 +417,15 @@ class LayoutLMv2Encoder(nn.Module):
         return rel_2d_pos
 
     def forward(
-        self,
-        hidden_states,
-        attention_mask=None,
-        head_mask=None,
-        output_attentions=False,
-        output_hidden_states=False,
-        return_dict=True,
-        bbox=None,
-        position_ids=None,
+            self,
+            hidden_states,
+            attention_mask=None,
+            head_mask=None,
+            output_attentions=False,
+            output_hidden_states=False,
+            return_dict=True,
+            bbox=None,
+            position_ids=None,
     ):
         all_hidden_states = () if output_hidden_states else None
         all_self_attentions = () if output_attentions else None
@@ -595,9 +593,9 @@ class LayoutLMv2VisualBackbone(nn.Module):
 
     def synchronize_batch_norm(self):
         if not (
-            torch.distributed.is_available()
-            and torch.distributed.is_initialized()
-            and torch.distributed.get_rank() > -1
+                torch.distributed.is_available()
+                and torch.distributed.is_initialized()
+                and torch.distributed.get_rank() > -1
         ):
             raise RuntimeError("Make sure torch.distributed is set up properly.")
 
@@ -771,24 +769,24 @@ class LayoutLMv2Model(LayoutLMv2PreTrainedModel):
 
     def _calc_visual_bbox(self, image_feature_pool_shape, bbox, device, final_shape):
         visual_bbox_x = (
-            torch.arange(
-                0,
-                1000 * (image_feature_pool_shape[1] + 1),
-                1000,
-                device=device,
-                dtype=bbox.dtype,
-            )
-            // self.config.image_feature_pool_shape[1]
+                torch.arange(
+                    0,
+                    1000 * (image_feature_pool_shape[1] + 1),
+                    1000,
+                    device=device,
+                    dtype=bbox.dtype,
+                )
+                // self.config.image_feature_pool_shape[1]
         )
         visual_bbox_y = (
-            torch.arange(
-                0,
-                1000 * (self.config.image_feature_pool_shape[0] + 1),
-                1000,
-                device=device,
-                dtype=bbox.dtype,
-            )
-            // self.config.image_feature_pool_shape[0]
+                torch.arange(
+                    0,
+                    1000 * (self.config.image_feature_pool_shape[0] + 1),
+                    1000,
+                    device=device,
+                    dtype=bbox.dtype,
+                )
+                // self.config.image_feature_pool_shape[0]
         )
         visual_bbox = torch.stack(
             [
@@ -807,18 +805,18 @@ class LayoutLMv2Model(LayoutLMv2PreTrainedModel):
     @add_start_docstrings_to_model_forward(LAYOUTLMV2_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
     @replace_return_docstrings(output_type=BaseModelOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
-        self,
-        input_ids=None,
-        bbox=None,
-        image=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+            self,
+            input_ids=None,
+            bbox=None,
+            image=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
     ):
         r"""
         Returns:
@@ -968,19 +966,19 @@ class LayoutLMv2ForSequenceClassification(LayoutLMv2PreTrainedModel):
     @add_start_docstrings_to_model_forward(LAYOUTLMV2_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @replace_return_docstrings(output_type=SequenceClassifierOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
-        self,
-        input_ids=None,
-        bbox=None,
-        image=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+            self,
+            input_ids=None,
+            bbox=None,
+            image=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
     ):
         r"""
         labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
@@ -1137,19 +1135,19 @@ class LayoutLMv2ForTokenClassification(LayoutLMv2PreTrainedModel):
     @add_start_docstrings_to_model_forward(LAYOUTLMV2_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @replace_return_docstrings(output_type=TokenClassifierOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
-        self,
-        input_ids=None,
-        bbox=None,
-        image=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        labels=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+            self,
+            input_ids=None,
+            bbox=None,
+            image=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
     ):
         r"""
         labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
@@ -1246,20 +1244,20 @@ class LayoutLMv2ForQuestionAnswering(LayoutLMv2PreTrainedModel):
     @add_start_docstrings_to_model_forward(LAYOUTLMV2_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @replace_return_docstrings(output_type=QuestionAnsweringModelOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
-        self,
-        input_ids=None,
-        bbox=None,
-        image=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        inputs_embeds=None,
-        start_positions=None,
-        end_positions=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+            self,
+            input_ids=None,
+            bbox=None,
+            image=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            start_positions=None,
+            end_positions=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
     ):
         r"""
         start_positions (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
@@ -1403,7 +1401,7 @@ class BiaffineAttention(nn.Module):
 class RegionExtractionDecoder(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.entity_emb = nn.Embedding(3, config.hidden_size, scale_grad_by_freq=True)
+        self.entity_emb = nn.Embedding(36, config.hidden_size, scale_grad_by_freq=True)
         projection = nn.Sequential(
             nn.Linear(config.hidden_size * 2, config.hidden_size),
             nn.ReLU(),
@@ -1414,7 +1412,7 @@ class RegionExtractionDecoder(nn.Module):
         )
         self.ffnn_head = copy.deepcopy(projection)
         self.ffnn_tail = copy.deepcopy(projection)
-        self.rel_classifier = BiaffineAttention(config.hidden_size // 2, 2)
+        self.rel_classifier = BiaffineAttention(config.hidden_size // 2, 4)
         self.loss_fct = nn.CrossEntropyLoss()
 
     def build_relation(self, relations, entities):
@@ -1423,34 +1421,71 @@ class RegionExtractionDecoder(nn.Module):
         for b in range(batch_size):
             if len(entities[b]["start"]) <= 2:
                 entities[b] = {"end": [1, 1], "label": [0, 0], "start": [0, 0]}
+            #            possible_relations =  [[7, 0], [7, 23], [7, 20], [7, 10], [7, 6], [7, 12], [7, 14], [15, 16], [15, 18], [15, 19], [15, 5], [15, 26], [15, 27], [15, 15], [16, 16], [16, 13], [16, 2], [13, 13], [19, 7], [19, 13], [19, 19], [17, 22], [17, 17], [17, 25], [17, 11], [17, 7], [17, 13], [5, 5], [5, 25], [5, 22], [5, 11], [22, 22], [3, 20], [3, 0], [3, 6], [27, 1], [27, 27], [27, 21], [1, 1], [11, 11], [26, 26], [2, 13], [2, 2], [24, 24], [23, 23], [12, 5], [18, 18], [18, 7], [18, 13], [25, 25], [4, 19]]
+
+            possible_relations = [[24, 18], [24, 30], [24, 23], [24, 25], [24, 20], [24, 11], [24, 12], [24, 15],
+                                  [6, 7], [6, 0], [6, 10], [6, 1], [6, 30], [6, 28], [6, 29], [6, 4], [6, 14], [6, 6],
+                                  [6, 16], [6, 17], [17, 0], [17, 1], [17, 13], [17, 2], [17, 28], [17, 17], [13, 13],
+                                  [0, 0], [0, 1], [0, 13], [0, 30], [0, 24], [0, 17], [32, 9], [32, 1], [32, 30],
+                                  [32, 24], [32, 27], [32, 26], [32, 28], [32, 29], [32, 32], [32, 13], [32, 34],
+                                  [7, 26], [7, 27], [7, 9], [7, 7], [9, 9], [4, 4], [4, 10], [4, 19], [4, 31], [5, 11],
+                                  [5, 5], [5, 18], [5, 23], [5, 15], [31, 31], [16, 16], [16, 13], [28, 28], [2, 13],
+                                  [2, 2], [10, 10], [29, 1], [29, 30], [29, 23], [29, 24], [29, 29], [29, 4], [29, 13],
+                                  [29, 15], [29, 34], [34, 23], [34, 24], [34, 15], [34, 29], [34, 34], [8, 8],
+                                  [14, 24], [14, 14], [14, 13], [33, 33], [11, 11], [23, 23], [27, 27], [26, 26],
+                                  [18, 18], [12, 12], [15, 15]]
             all_possible_relations = set(
                 [
                     (i, j)
                     for i in range(len(entities[b]["label"]))
                     for j in range(len(entities[b]["label"]))
-                    if entities[b]["label"][i] == 1 and entities[b]["label"][j] == 2
+                    if [entities[b]["label"][i], entities[b]["label"][j]] in possible_relations
+                    #                    if entities[b]["label"][i] == 1 and entities[b]["label"][j] == 2
                 ]
             )
             if len(all_possible_relations) == 0:
                 all_possible_relations = set([(0, 1)])
-            positive_relations = set(list(zip(relations[b]["head"], relations[b]["tail"])))
-            negative_relations = all_possible_relations - positive_relations
-            positive_relations = set([i for i in positive_relations if i in all_possible_relations])
-            reordered_relations = list(positive_relations) + list(negative_relations)
+            parent_child_relation = set(
+                [(relations[b]["head"][i], relations[b]["tail"][i]) for i in range(len(relations[b]["type"])) if
+                 relations[b]["type"][i] == "parent_child"])
+            peer_relation = set(
+                [(relations[b]["head"][i], relations[b]["tail"][i]) for i in range(len(relations[b]["type"])) if
+                 relations[b]["type"][i] == "peer_linking"])
+            same_relation = set(
+                [(relations[b]["head"][i], relations[b]["tail"][i]) for i in range(len(relations[b]["type"])) if
+                 relations[b]["type"][i] == "same_label"])
+            negative_relations = all_possible_relations - parent_child_relation - peer_relation - same_relation
+            parent_child_relation = set([i for i in parent_child_relation if i in all_possible_relations])
+            peer_relation = set([i for i in peer_relation if i in all_possible_relations])
+            same_relation = set([i for i in same_relation if i in all_possible_relations])
+            reordered_relations = list(same_relation) + list(parent_child_relation) + list(peer_relation) + list(
+                negative_relations)
+
+            #            positive_relations = set(list(zip(relations[b]["head"], relations[b]["tail"])))
+            #            negative_relations = all_possible_relations - positive_relations
+            #            positive_relations = set([i for i in positive_relations if i in all_possible_relations])
+            #            reordered_relations = list(positive_relations) + list(negative_relations)
             relation_per_doc = {"head": [], "tail": [], "label": []}
             relation_per_doc["head"] = [i[0] for i in reordered_relations]
             relation_per_doc["tail"] = [i[1] for i in reordered_relations]
-            relation_per_doc["label"] = [1] * len(positive_relations) + [0] * (
-                len(reordered_relations) - len(positive_relations)
-            )
+            relation_per_doc["label"] = [3] * len(same_relation) + [2] * len(parent_child_relation) + [1] * len(
+                peer_relation) + [0] * (len(reordered_relations) - len(parent_child_relation) - len(
+                peer_relation) - len(same_relation))
+
+            #            relation_per_doc["label"] = [1] * len(positive_relations) + [0] * (
+            #                len(reordered_relations) - len(positive_relations)
+            #            )
             assert len(relation_per_doc["head"]) != 0
             new_relations.append(relation_per_doc)
         return new_relations, entities
 
     def get_predicted_relations(self, logits, relations, entities):
         pred_relations = []
+        labels = {3: 'same_label', 2: 'parent_child_relation', 1: 'peer_relation'}
+        class_prob = torch.softmax(logits, dim=-1)
+        conf, classes = torch.max(class_prob, -1)
         for i, pred_label in enumerate(logits.argmax(-1)):
-            if pred_label != 1:
+            if pred_label == 0:
                 continue
             rel = {}
             rel["head_id"] = relations["head"][i]
@@ -1460,7 +1495,8 @@ class RegionExtractionDecoder(nn.Module):
             rel["tail_id"] = relations["tail"][i]
             rel["tail"] = (entities["start"][rel["tail_id"]], entities["end"][rel["tail_id"]])
             rel["tail_type"] = entities["label"][rel["tail_id"]]
-            rel["type"] = 1
+            rel["type"] = labels[pred_label.tolist()]
+            rel['confidence'] = float(np.round(conf.cpu().data[i].numpy(), 3))
             pred_relations.append(rel)
         return pred_relations
 
@@ -1500,6 +1536,7 @@ class RegionExtractionDecoder(nn.Module):
             all_pred_relations.append(pred_relations)
         return loss, all_pred_relations
 
+
 @add_start_docstrings(
     """
     LayoutLMv2 Model with a relation extract head ontop for identifying relations between different groups of text
@@ -1522,17 +1559,17 @@ class LayoutLMv2ForRelationExtraction(LayoutLMv2PreTrainedModel):
     @add_start_docstrings_to_model_forward(LAYOUTLMV2_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @replace_return_docstrings(output_type=RegionExtractionOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
-        self,
-        input_ids,
-        bbox,
-        labels=None,
-        image=None,
-        attention_mask=None,
-        token_type_ids=None,
-        position_ids=None,
-        head_mask=None,
-        entities=None,
-        relations=None,
+            self,
+            input_ids,
+            bbox,
+            labels=None,
+            image=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            entities=None,
+            relations=None,
     ):
         r"""
         entities (list of dicts of shape `(batch_size,)` where each dict contains:
